@@ -28,22 +28,21 @@ $ buildah bud -t vexxhost/openmanage:19.02.00 --build-arg VERSION=19.02.00 .
 # Create a Pod for OpenManage
 $ podman pod create -n openmanage
 
+# Load IPMI module
+$ modprobe ipmi_si
+
 # Create containers for base services to provide functional CLI
-$ mkdir -p /var/tmp/openmanage/{shrsvc,.ipc}
-$ podman run --pod openmanage --privileged -d --name dsm_om_shrsvcd \
-            --volume /var/tmp/openmanage/shrsvc:/opt/dell/srvadmin/var/lib/openmanage/shrsvc
+$ mkdir -p /var/tmp/openmanage/.ipc
+$ podman run --pod openmanage --privileged -d --name dsm_om_shrsvcd --device /dev/ipmi0 \
             --volume /var/tmp/openmanage/.ipc:/opt/dell/srvadmin/var/lib/openmanage/.ipc 
             vexxhost/openmanage:19.02.00 dsm_om_shrsvcd
-$ podman run --pod openmanage --privileged -d --name dsm_sa_eventmgrd \
-            --volume /var/tmp/openmanage/shrsvc:/opt/dell/srvadmin/var/lib/openmanage/shrsvc
+$ podman run --pod openmanage --privileged -d --name dsm_sa_eventmgrd --device /dev/ipmi0 \
             --volume /var/tmp/openmanage/.ipc:/opt/dell/srvadmin/var/lib/openmanage/.ipc
             vexxhost/openmanage:19.02.00 dsm_sa_eventmgrd
-$ podman run --pod openmanage --privileged -d --name dsm_sa_datamgrd \
-            --volume /var/tmp/openmanage/shrsvc:/opt/dell/srvadmin/var/lib/openmanage/shrsvc
+$ podman run --pod openmanage --privileged -d --name dsm_sa_datamgrd --device /dev/ipmi0 \
             --volume /var/tmp/openmanage/.ipc:/opt/dell/srvadmin/var/lib/openmanage/.ipc
             vexxhost/openmanage:19.02.00 dsm_sa_datamgrd
-$ podman run --pod openmanage --privileged -d --name dsm_sa_snmpd \
-            --volume /var/tmp/openmanage/shrsvc:/opt/dell/srvadmin/var/lib/openmanage/shrsvc
+$ podman run --pod openmanage --privileged -d --name dsm_sa_snmpd --device /dev/ipmi0 \
             --volume /var/tmp/openmanage/.ipc:/opt/dell/srvadmin/var/lib/openmanage/.ipc
             vexxhost/openmanage:19.02.00 dsm_sa_snmpd
 
